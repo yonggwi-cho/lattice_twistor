@@ -1,0 +1,72 @@
+GFORTRAN module created from twister_New.f90 on Wed Dec 26 20:19:41 2012
+If you edit this, you'll get what you deserve.
+
+(() () () () () () () () () () () () () () () () () () () () ())
+
+()
+
+()
+
+()
+
+()
+
+(2 'delta' 'subprog' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
+FUNCTION) (REAL 8 ()) 3 0 (4 5) () 6 () ())
+7 'x' 'subprog' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL FUNCTION)
+(REAL 8 ()) 8 0 (9 10 11 12 13) () 14 () ())
+15 'subprog' 'subprog' 1 ((MODULE UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN) (
+UNKNOWN 0 ()) 0 0 () () 0 () ())
+16 'sgm' 'subprog' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
+FUNCTION) (COMPLEX 8 ()) 17 0 (18 19 20) () 21 () ())
+22 'del' 'subprog' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
+FUNCTION) (COMPLEX 8 ()) 23 0 (24 25 26 27 28 29 30 31 32) () 33 () ())
+5 'j' '' 3 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0 0
+() () 0 () ())
+4 'i' '' 3 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0 0
+() () 0 () ())
+6 'n' '' 3 ((VARIABLE UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN RESULT) (REAL
+8 ()) 0 0 () () 0 () ())
+20 'mu' '' 17 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+21 's' '' 17 ((VARIABLE UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN RESULT) (
+COMPLEX 8 ()) 0 0 () () 0 () ())
+10 'n1' '' 8 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+9 'mu' '' 8 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0 0
+() () 0 () ())
+12 'm1' '' 8 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+11 'n3' '' 8 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+14 'y' '' 8 ((VARIABLE UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN RESULT) (
+REAL 8 ()) 0 0 () () 0 () ())
+13 'm2' '' 8 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+24 'mu' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+25 'n1' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+28 'n3p' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ())
+0 0 () () 0 () ())
+19 'beta' '' 17 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ())
+0 0 () () 0 () ())
+18 'alpha' '' 17 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ())
+0 0 () () 0 () ())
+27 'n3' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+30 'm1p' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ())
+0 0 () () 0 () ())
+33 'dc' '' 23 ((VARIABLE UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN RESULT) (
+COMPLEX 8 ()) 0 0 () () 0 () ())
+32 'm2p' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ())
+0 0 () () 0 () ())
+31 'm2' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+29 'm1' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ()) 0
+0 () () 0 () ())
+26 'n1p' '' 23 ((VARIABLE IN UNKNOWN-PROC UNKNOWN DUMMY) (INTEGER 4 ())
+0 0 () () 0 () ())
+)
+
+('del' 0 22 'sgm' 0 16 'delta' 0 2 'subprog' 0 15 'x' 0 7)

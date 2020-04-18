@@ -1,0 +1,222 @@
+! //  global variable===============================================
+module params
+  implicit none
+  integer,parameter :: Nspn = 2   ! number of Dirac indies
+  integer,parameter :: Ndir = 4   ! number of lorentz indies
+  integer,parameter :: Nst = 4  ! number of spacetime's  length
+  integer,parameter :: Nvol = Nst**4 ! volume
+  integer,parameter :: Nint = Nvol*Nspn ! internal degree of freedom 
+  real(8),parameter :: c = 0.0d0  ! constant value of t2,t4 
+  real(8),parameter :: PI = 6.0d0*asin(0.5d0) ! PI 
+end module params
+! ==================================================================
+! //  function======================================================
+module subprog
+  implicit none
+contains
+! // klonecker delta----------------------------------------
+  function delta(i,j) result(n)
+    use params
+    integer,intent(in) :: i,j
+    integer k,l
+    real(8) n
+!~~impose periodic boundary condition~~
+    if (i==0) then
+       k = Nst
+    else if(i==Nst+1) then
+       k = 1
+    else
+       k = i
+    endif
+    if(j==0)then
+       l = Nst
+    else if(j==Nst+1)then
+       l = 1
+    else
+       l = j
+    endif
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(k==l)then
+       n = 1.0d0
+    else if(k.ne.l)then 
+       n = 0.0d0
+    else
+       stop "something is wrong!"
+    endif
+  end function delta
+! --------------------------------------------------------
+! // pauli matrix-------------------------------------------
+  function sgm(mu,alpha,beta) result(s)
+    integer,intent(in)::mu,alpha,beta
+    complex(kind(0d0)) A(2,2,4)
+    complex(kind(0d0)) s
+    A(1,1:2,1) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
+    A(2,1:2,1) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(1,1:2,2) = (/(0.0d0,0.0d0),(0.0d0,-1.0d0)/)
+    A(2,1:2,2) = (/(0.0d0,1.0d0),(0.0d0,0.0d0)/)
+    A(1,1:2,3) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(2,1:2,3) = (/(0.0d0,0.0d0),(-1.0d0,0.0d0)/)
+    A(1,1:2,4) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(2,1:2,4) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
+    s = A(alpha,beta,mu)
+  end function sgm
+! --------------------------------------------------------
+! // coordinate -------------------------------------------
+  function x(mu,n1,n3,m1,m2) result(y)
+    use params
+    integer,intent(in) :: mu,n1,n3,m1,m2
+    real(8) y
+    if(mu==1) then
+       y = (c*m1 - n1*m2 - c)/(1+m1**2+m2**2)
+    else if(mu==2) then
+       y = (n1 - n3*m1 + c*m2)/(1+m1**2+m2**2)
+    else if(mu==3) then
+       y = (c - n3*m2 + c*m1)/(1+m1**2+m2**2)
+    else if(mu==4) then
+       y = (n1*m1 + c*m2 + n3)/(1+m1**2+m2**2)
+    endif
+  end function x
+! --------------------------------------------------------
+! // delivative term --------------------------------------------------------------------------------------
+  function del(mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p) result(dc)
+    use params
+    integer,intent(in) :: mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p
+    real(8) dr
+    complex(kind(0d0)) dc
+    if(mu==1) then
+       dr = -(delta(n1+1,n1p)-delta(n1-1,n1p))*delta(n3,n3p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m2) &
+            + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+            /(dble(-2.0d0*m1*x(1,n1,n3,m1,m2)+c)*dble(2.0d0)) &
+            + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+            /(dble(-2.0d0*m2*x(1,n1,n3,m1,m2)-n1)*dble(2.0d0))
+    else if(mu==2) then
+       dr = (delta(n1+1,n1p)-delta(n1-1,n1p))*delta(n3,n3p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0) &
+            - (delta(n3+1,n3p)-delta(n3-1,n3p))*delta(n1,n1p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m1) &
+            + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+            /(dble(-2.0d0*m1*x(2,n1,n3,m1,m2)-n3)*dble(2.0d0)) &
+            + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+            /(dble(-2.0d0*m2*x(2,n1,n3,m1,m2)-c)*dble(2.0d0))
+    else if(mu==3) then
+       dr = -(delta(n3+1,n3p)-delta(n3-1,n3p))*delta(n1,n1p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m2) &
+            + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+            /(dble(-2.0d0*m1*x(3,n1,n3,m1,m2)+c)*dble(2.0d0)) &
+            + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+            /(dble(-2.0d0*m2*x(3,n1,n3,m1,m2)-n3)*dble(2.0d0))
+    else if(mu==4) then
+       dr = (delta(n1+1,n1p)-delta(n1-1,n1p))*delta(n3,n3p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m1) &
+           + (delta(n3+1,n3p)-delta(n3-1,n3p))*delta(n1,n1p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0) &
+           + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+           /(dble(-2.0d0*m1*x(4,n1,n3,m1,m2)+n1)*dble(2.0d0)) &
+           + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+           /(dble(-2.0d0*m2*x(4,n1,n3,m1,m2)+c)*dble(2.0d0))
+    endif
+    dr = dble(1+m1**2+m2**2)*dr/4.0d0
+    dc = cmplx(dr,0,kind(0d0))
+  end function del
+! ---------------------------------------------------------------------------------------------------------
+end module subprog
+!=============================================================================================================
+! // Fermions on the twister space       
+! // Solve Dirac operator                
+! // impose periodic boundary condtion (s,t)  
+! // we use weyl fermion                        
+! // t2, t4 set to constant
+! // lattice spacing is 1 (a,b)
+!=============================================================================================================
+program main
+  use params
+  use subprog
+  implicit none
+  ! Parameters
+  Integer nb, nmax
+  Parameter (nb=64, nmax=Nint)
+  Integer lda, ldvr, lwork
+  Parameter (lda=nmax, ldvr=nmax, lwork=(1+nb)*nmax)
+  ! Local Scalars
+  Integer i,j,ifail,info,lwkopt
+  integer  mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p,alpha,beta
+  real(8) time1,time2
+  ! Local Arrays
+  Complex (kind(0D0)) dummy(1, 1),work(lwork)
+  Double Precision rwork(2*nmax)
+  complex(kind(0d0)),allocatable :: Dirac(:,:),D(:,:,:),Eigen(:)
+  allocate(D(Nint,Nint,Ndir))
+  allocate(Dirac(Nint,Nint))
+  allocate(Eigen(Nint))
+  ! zero clear
+  Dirac(:,:) = 0.0d0
+  D(:,:,:) = 0.0d0
+  Eigen(:) = 0.0d0
+
+  ! set Dirac operator
+  write(*,*) "Start making Dirac operator!"
+  do mu = 1, Ndir
+     do alpha = 1, Nspn
+     do beta = 1, Nspn
+        do n1 = 1, Nst
+        do n1p = 1, Nst
+           do n3 = 1, Nst
+           do n3p = 1, Nst
+              do m1 = 1, Nst
+              do m1p = 1, Nst
+                 do m2 = 1, Nst
+                 do m2p = 1, Nst
+                    i =  alpha + Nspn*(n1-1) + Nspn*Nst*(n3-1) + Nspn*Nst**2*(m1-1) + Nspn*Nst**3*(m2-1) 
+                    j =  beta  + Nspn*(n1p-1) + Nspn*Nst*(n3p-1) + Nspn*Nst**2*(m1p-1) + Nspn*Nst**3*(m2p-1)
+                    write(*,*) i,j
+                    D(i,j,mu) = sgm(mu,alpha,beta)*del(mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p)
+                 enddo
+                 enddo
+              enddo
+              enddo    
+           enddo
+           enddo
+        enddo
+        enddo
+     enddo
+     enddo
+  enddo
+  do i = 1, Nint
+     do j = 1, Nint
+        do mu = 1, Ndir
+           Dirac(i,j) = Dirac(i,j) + D(i,j,mu)
+        enddo
+     enddo
+  enddo
+  write(*,*) "Finished making Dirac operator!"
+  call cpu_time(time1)
+  write(*,*) "Start solving Dirac operator!"
+  ! Compute the eigenvalues by using the lapack
+  Call zgeev('N','N',Nint,Dirac,Nint,Eigen,dummy,1,dummy,1,work,lwork,rwork,info)
+  call cpu_time(time2)
+  write(*,*) "Finished solving Dirac operator!"
+  write(*,130) time2-time1
+130 format("Solving time [sec]=",f7.2)
+  lwkopt = work(1)
+  !  Print solution
+  open(10,file='eigen.d',status="replace")
+  if(info == 0) then
+     do j = 1, Nint
+        Write (10, *) atan(aimag(Eigen(j))/real(Eigen(j))),&
+             dsqrt(real(Eigen(j))**2+aimag(Eigen(j))**2),Eigen(j)
+     enddo
+     ifail = 0
+  else
+     Write (*, *)
+     Write (*, 110) 'Failure in ZGEEV.  INFO = ', info
+  endif
+  ! Print workspace information
+  If (lwork<lwkopt) Then
+     Write (*, *)
+     Write (*, 120) 'Optimum workspace required = ', lwkopt, &
+          'Workspace provided         = ', lwork
+  EndIf
+  close(10)
+  deallocate(D)
+  deallocate(Eigen)
+  deallocate(Dirac)
+100 Format ((3X,4(' (',F7.4,',',F7.4,')',:)))
+110 Format (1X, A, I4)
+120 Format (1X, A, I5, /1X, A, I5)
+End Program main
+!=============================================================================================================

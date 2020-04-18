@@ -1,0 +1,9 @@
+F90 = gfortran
+FTOOL = params.f90 tool.f90 
+FFLAGS = -llapack -lblas
+
+eigen: twister.f90 $(FTOOL)
+	$(F90)  $(FTOOL) twister.f90 $(FFLAGS) -o eigen
+
+clean:
+	rm -f eigen params.mod subprog.mod

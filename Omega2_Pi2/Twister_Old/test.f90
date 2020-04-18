@@ -1,0 +1,160 @@
+! //  global variable===============================================
+module params
+  implicit none
+  integer,parameter :: Nspn = 2   ! number of Dirac indies
+  integer,parameter :: Ndir = 4   ! number of lorentz indies
+  integer,parameter :: Nst = 2  ! number of spacetime's  length
+  integer,parameter :: Nvol = Nst**4 ! volume
+  integer,parameter :: Nint = Nvol*Nspn ! internal degree of freedom 
+  real(8),parameter :: c = 3.0d0  ! constant value of t2,t4 
+  real(8),parameter :: PI = 6.0d0*asin(0.5d0) ! PI 
+end module params
+! ==================================================================
+! //  function======================================================
+module subprog
+  implicit none
+contains
+! // klonecker delta----------------------------------------
+  function delta(i,j) result(n)
+    use params
+    integer,intent(in) :: i,j
+    integer k,l
+    real(8) n
+!~~impose periodic boundary condition~~
+    if (i==0) then
+       k = Nst
+    else if(i==Nst+1) then
+       k = 1
+    else
+       k = i
+    endif
+    if(j==0)then
+       l = Nst
+    else if(j==Nst+1)then
+       l = 1
+    else
+       l = j
+    endif
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(k==l)then
+       n = 1.0d0
+    else if(k.ne.l)then 
+       n = 0.0d0
+    else
+       stop "something is wrong!"
+    endif
+  end function delta
+! --------------------------------------------------------
+! // pauli matrix ---------------------------------------
+  function sgm(alpha,beta,mu) result(s)
+    integer,intent(in)::mu,alpha,beta
+    complex(kind(0d0)) A(2,2,4)
+    complex(kind(0d0)) s
+    A(1,1:2,1) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
+    A(2,1:2,1) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(1,1:2,2) = (/(0.0d0,0.0d0),(0.0d0,-1.0d0)/)
+    A(2,1:2,2) = (/(0.0d0,1.0d0),(0.0d0,0.0d0)/)
+    A(1,1:2,3) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(2,1:2,3) = (/(0.0d0,0.0d0),(-1.0d0,0.0d0)/)
+    A(1,1:2,4) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(2,1:2,4) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
+    if(mu==4) then
+       s = A(alpha,beta,mu)
+    else 
+       s = -A(alpha,beta,mu)*(0.0d0,1.0d0)
+    endif
+  end function sgm
+! --------------------------------------------------------
+! // coordinate -------------------------------------------
+  function x(mu,n1,n3,m1,m2) result(y)
+    use params
+    integer,intent(in) :: mu,n1,n3,m1,m2
+    real(8) y
+    if(mu==1) then
+       y = (c*(m1-1) - n1*(m2-1) - c)/(1+(m1-1)**2+(m2-1)**2)
+    else if(mu==2) then
+       y = (n1 - n3*(m1-1) + c*(m2-1))/(1+(m1-1)**2+(m2-1)**2)
+    else if(mu==3) then
+       y = (c - n3*(m2-1) + c*(m1-1))/(1+(m1-1)**2+(m2-1)**2)
+    else if(mu==4) then
+       y = (n1*(m1-1) + c*(m2-1) + n3)/(1+(m1-1)**2+(m2-1)**2)
+    endif
+  end function x
+! --------------------------------------------------------
+! // delivative term --------------------------------------------------------------------------------------
+  function del(mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p) result(dc)
+    use params
+    integer,intent(in) :: mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p
+    real(8) dr
+    complex(kind(0d0)) dc
+    if(mu==1) then
+       dr = -(delta(n1+1,n1p)-delta(n1-1,n1p))*delta(n3,n3p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m2) &
+            + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+            /(dble(-2.0d0*m1*x(1,n1,n3,m1,m2)+c)*dble(2.0d0)) &
+            + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+            /(dble(-2.0d0*m2*x(1,n1,n3,m1,m2)-n1)*dble(2.0d0))
+    else if(mu==2) then
+       dr = (delta(n1+1,n1p)-delta(n1-1,n1p))*delta(n3,n3p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0) &
+            - (delta(n3+1,n3p)-delta(n3-1,n3p))*delta(n1,n1p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m1) &
+            + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+            /(dble(-2.0d0*m1*x(2,n1,n3,m1,m2)-n3)*dble(2.0d0)) &
+            + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+            /(dble(-2.0d0*m2*x(2,n1,n3,m1,m2)-c)*dble(2.0d0))
+    else if(mu==3) then
+       dr = -(delta(n3+1,n3p)-delta(n3-1,n3p))*delta(n1,n1p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m2) &
+            + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+            /(dble(-2.0d0*m1*x(3,n1,n3,m1,m2)+c)*dble(2.0d0)) &
+            + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+            /(dble(-2.0d0*m2*x(3,n1,n3,m1,m2)-n3)*dble(2.0d0))
+    else if(mu==4) then
+       dr = (delta(n1+1,n1p)-delta(n1-1,n1p))*delta(n3,n3p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0*m1) &
+            + (delta(n3+1,n3p)-delta(n3-1,n3p))*delta(n1,n1p)*delta(m1,m1p)*delta(m2,m2p)/dble(2.0d0) &
+            + (delta(m1+1,m1p)-delta(m1-1,m1p))*delta(n3,n3p)*delta(n1,n1p)*delta(m2,m2p) &
+            /(dble(-2.0d0*m1*x(4,n1,n3,m1,m2)+n1)*dble(2.0d0)) &
+            + (delta(m2+1,m2p)-delta(m2-1,m2p))*delta(n3,n3p)*delta(n1,n1p)*delta(m1,m1p) &
+            /(dble(-2.0d0*m2*x(4,n1,n3,m1,m2)+c)*dble(2.0d0))
+    endif
+    dr = dble(1+m1**2+m2**2)*dr/4.0d0
+    dc = cmplx(dr,0,kind(0d0))
+  end function del
+! ---------------------------------------------------------------------------------------------------------
+end module subprog
+!=============================================================================================================
+! // Fermions on the twister space       
+! // Solve Dirac operator                
+! // impose periodic boundary condtion (s,t)  
+! // we use weyl fermion                        
+! // t2, t4 set to constant
+! // lattice spacing is 1 (a,b)
+!=============================================================================================================
+program main
+  use params
+  use subprog
+  implicit none
+  ! Local Scalars
+  Integer i,j,ifail,info,lwkopt,lr
+  integer  mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p,alpha,beta
+  real(8) time1,time2
+  write(*,*) delta(1,1)
+  write(*,*) delta(1,2)
+  write(*,*) sgm(1,2,1)
+  do mu = 1, Ndir
+     do n1 = 1, Nst
+        do n1p = 1, Nst
+           do n3 = 1, Nst
+              do n3p = 1, Nst
+                 do m1 = 1, Nst
+                    do m1p = 1, Nst
+                       do m2 = 1, Nst
+                          do m2p = 1, Nst
+                             write(*,*) del(mu,n1,n1p,n3,n3p,m1,m1p,m2,m2p)
+                          enddo
+                       enddo
+                    enddo
+                 enddo
+              enddo
+           enddo
+        enddo
+     enddo
+  enddo
+end program main

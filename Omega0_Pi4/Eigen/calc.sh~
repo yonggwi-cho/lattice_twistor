@@ -1,0 +1,3 @@
+#!/bin/bash
+for((Ns=2;Ns<=16;Ns++))
+sed "s/Ns=2/Ns=/g"

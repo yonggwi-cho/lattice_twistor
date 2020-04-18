@@ -1,0 +1,11 @@
+! //  global variable===============================================
+module params
+  implicit none
+  integer,parameter :: Nspn = 2   ! number of Dirac indies
+  integer,parameter :: Ndir = 4   ! number of lorentz indies
+  integer Ns   ! number of s length
+  integer Nvol   ! vox size
+  integer Nint   ! internal degree of freedom
+  real(8) a
+end module params
+! ==================================================================
