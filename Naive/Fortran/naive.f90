@@ -1,11 +1,6 @@
 !=========================================================================================================
-! // Fermions on the twister lattice space       
-! // Solve Dirac operator                
-! // impose periodic boundary condtion on s  
-! // impose dirichlet boundary condtion on t  
-! // we use weyl fermion                        
-! // t2, t4 set to constant
-! // lattice spacing is (a,b)
+! // naive Fermions
+! // Solve eigen values for a Dirac operator              
 !=========================================================================================================
 program main
   use params
@@ -34,8 +29,7 @@ program main
   ! set Dirac operator
   write(*,*)"================================================================================================="
   write(10,*)"================================================================================================"
-  write(*,*)"eigensolver of the Dirac operator(Weyl fermion) on the twister-like lattice space"
-  write(10,*)"eigensolver of the Dirac operator(Weyl fermion) on the twister-like lattice space"
+  write(*,*)" eigensolver of the Dirac operator (Naive fermion)"
   write(*,*)"use LAPACK!"
   write(*,*)"Ns :",Ns
   write(10,*)"Ns :",Ns
@@ -59,7 +53,8 @@ program main
                                 do mu = 1, Ndir
                                    i =  alpha + Nspn*(n1-1) + Nspn*Ns*(n2-1) + Nspn*Ns**2*(n3-1) + Nspn*Ns**3*(n4-1)
                                    j =  beta  + Nspn*(n1p-1) + Nspn*Ns*(n2p-1) + Nspn*Ns**2*(n3p-1) + Nspn*Ns**3*(n4p-1)
-                                   Dirac(i,j) += naive(i,j,mu)
+                                   d = naive(i,j,alpha,beta,mu)
+                                   Dirac(i,j) = Dirac(i,j) + d
                                    if((abs(Dirac(i,j))*0.0d0)/=0.0d0) then
                                       write(*,140)mu,alpha,n1,n2,n3,n4,Dirac(i,j)
                                       stop 
