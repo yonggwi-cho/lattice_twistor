@@ -62,18 +62,6 @@ contains
     endif
   end function delta
 !---------------------------------------------------------------------
-! naive fermion------------------------------------------------------
-  function naive(i,j,alpha,beta,mu) result(d)
-    use params
-    integer,intent(in) :: i,j,alpha,beta,mu
-    integer k,l,m
-    complex(kind(0d0)) d
-    call periodic(i,k)
-    call periodic(j,l)
-    call periodic(j-1,m)
-    d = (delta(k,l)-delta(k,m))*gamma(mu,alpha,beta)
-  end function naive
-!---------------------------------------------------------------
 ! // klonecker delta -------------------------------------------
   function delta1(i,j) result(n)
     use params
@@ -90,7 +78,7 @@ contains
        stop "something is wrong!"
     endif
   end function delta1
-!--------------------------------
+!---------------------------------------------------------------------------
 ! // klonecker delta -------------
   function delta2(i,j) result(n)
     use params
@@ -108,6 +96,62 @@ contains
     endif
   end function delta2
   !-------------------------------------------------------------------------
+
+! // pauli matrix----------------------------------------------------------
+  function sgm(mu,alpha,beta) result(s)
+    integer,intent(in)::mu,alpha,beta
+    complex(kind(0d0)) A(2,2,4)
+    complex(kind(0d0)) s
+    complex(kind(0d0)),parameter::I = (0.0d0,1.0d0)
+    A(1,1:2,1) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
+    A(2,1:2,1) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(1,1:2,2) = (/(0.0d0,0.0d0),(0.0d0,-1.0d0)/)
+    A(2,1:2,2) = (/(0.0d0,1.0d0),(0.0d0,0.0d0)/)
+    A(1,1:2,3) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(2,1:2,3) = (/(0.0d0,0.0d0),(-1.0d0,0.0d0)/)
+    A(1,1:2,4) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
+    A(2,1:2,4) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
+    if (mu.ne.4) then
+       s = -I*A(alpha,beta,mu)
+    else
+       s = A(alpha,beta,mu)
+    endif
+  end function sgm
+ !---------------------------------------------------------------------
+  function dis(n1,n2,n3,n4) result(r)
+    use params
+    integer,intent(in)::n1,n2,n3,n4
+    real(8) r
+    r = n1**2 + n2**2 + n3**2 + n4**2
+  end function dis
+ !---------------------------------------------------------------------
+ ! naive fermion-----------------------------------------------------------
+  function naive(n1,n1p,n2,n2p,n3,n3p,n4,n4p,alpha,beta,mu) result(d)
+    use params
+    integer,intent(in) :: n1,n1p,n2,n2p,n3,n3p,n4,n4p
+    integer,intent(in) :: alpha,beta,mu
+    integer k,l,m
+    complex(kind(0d0)) d
+    if (mu == 1) then
+       call periodic(n1,k)
+       call periodic(n1p+1,l)
+       call periodic(n1p-1,m)
+    else if (mu==2) then
+       call periodic(n2,k)
+       call periodic(n2p+1,l)
+       call periodic(n2p-1,m)
+    else if (mu==3) then
+       call periodic(n3,k)
+       call periodic(n3p+1,l)
+       call periodic(n3p-1,m)
+    else if (mu==4) then
+       call periodic(n4,k)
+       call periodic(n4p+1,l)
+       call periodic(n4p-1,m)
+    endif
+    d = (delta(k,l)-delta(k,m))*gamma(mu,alpha,beta)
+  end function naive
+  !-------------------------------------------------------------------
   !--- euclidian gamma matrix ----------------------------------------
   function gamma(mu,a,b)  result (d)
     integer,intent(in) :: a,b,mu
@@ -136,35 +180,8 @@ contains
     !----------------
     d = G(a,b,mu)
   end function gamma
-!---------------------------------------------------------------------
-! // pauli matrix----------------------------------------------------------
-  function sgm(mu,alpha,beta) result(s)
-    integer,intent(in)::mu,alpha,beta
-    complex(kind(0d0)) A(2,2,4)
-    complex(kind(0d0)) s
-    complex(kind(0d0)),parameter::I = (0.0d0,1.0d0)
-    A(1,1:2,1) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
-    A(2,1:2,1) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
-    A(1,1:2,2) = (/(0.0d0,0.0d0),(0.0d0,-1.0d0)/)
-    A(2,1:2,2) = (/(0.0d0,1.0d0),(0.0d0,0.0d0)/)
-    A(1,1:2,3) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
-    A(2,1:2,3) = (/(0.0d0,0.0d0),(-1.0d0,0.0d0)/)
-    A(1,1:2,4) = (/(1.0d0,0.0d0),(0.0d0,0.0d0)/)
-    A(2,1:2,4) = (/(0.0d0,0.0d0),(1.0d0,0.0d0)/)
-    if (mu.ne.4) then
-       s = -I*A(alpha,beta,mu)
-    else
-       s = A(alpha,beta,mu)
-    endif
-  end function sgm
-! ---------------------------------------------------------------------
-  function dis(n1,n2,n3,n4) result(r)
-    use params
-    integer,intent(in)::n1,n2,n3,n4
-    real(8) r
-    r = n1**2 + n2**2 + n3**2 + n4**2
-  end function dis
-! // Delivative term --------------------------------------------------------------------------------------------------
+  !------------------------------------------------------------------------------------------------------------
+  ! // Delivative term ----------------------------------------------------------------------------------------
   function del(mu,n1,n1p,n2,n2p,n3,n3p,n4,n4p) result(dc)
     use params
     integer,intent(in) :: mu,n1,n1p,n2,n2p,n3,n3p,n4,n4p

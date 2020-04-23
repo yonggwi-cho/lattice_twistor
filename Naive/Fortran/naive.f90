@@ -21,8 +21,7 @@ program main
   complex(kind(0d0)) d
 
   allocate(Dirac(Nint,Nint))
-  ! zero clear
-  Dirac(:,:) = 0.0d0
+  Dirac(:,:) = 0.0d0 ! zero padding
   write(output,12) Ns
 12 format("./Output/eigen_Ns_",i2.2,".d")
   open(10,file=output,status="replace")
@@ -53,7 +52,8 @@ program main
                                 do mu = 1, Ndir
                                    i =  alpha + Nspn*(n1-1) + Nspn*Ns*(n2-1) + Nspn*Ns**2*(n3-1) + Nspn*Ns**3*(n4-1)
                                    j =  beta  + Nspn*(n1p-1) + Nspn*Ns*(n2p-1) + Nspn*Ns**2*(n3p-1) + Nspn*Ns**3*(n4p-1)
-                                   d = naive(i,j,alpha,beta,mu)
+                                   d = naive(n1,n1p,n2,n2p,n3,n3p,n4,n4p,alpha,beta,mu)
+                                   write(*,*) i,j,d
                                    Dirac(i,j) = Dirac(i,j) + d
                                    if((abs(Dirac(i,j))*0.0d0)/=0.0d0) then
                                       write(*,140)mu,alpha,n1,n2,n3,n4,Dirac(i,j)
