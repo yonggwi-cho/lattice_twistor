@@ -24,9 +24,9 @@ contains
     use params
     integer,intent(in)::i
     integer,intent(out):: m
-    if (i==-1) then
-       m = Ns-1
-    else if(i==Ns) then
+    if (i<=0) then
+       m = Ns
+    else if(i>=Ns+1) then
        m = 1
     else
        m = i
@@ -133,23 +133,23 @@ contains
     integer k,l,m
     complex(kind(0d0)) d
     if (mu == 1) then
-       call periodic(n1,k)
-       call periodic(n1p+1,l)
-       call periodic(n1p-1,m)
+       call periodic(n1+1,k)
+       call periodic(n1-1,l)
+       call periodic(n1p,m)
     else if (mu==2) then
-       call periodic(n2,k)
-       call periodic(n2p+1,l)
-       call periodic(n2p-1,m)
+       call periodic(n2+1,k)
+       call periodic(n2-1,l)
+       call periodic(n2p,m)
     else if (mu==3) then
-       call periodic(n3,k)
-       call periodic(n3p+1,l)
-       call periodic(n3p-1,m)
+       call periodic(n3+1,k)
+       call periodic(n3-1,l)
+       call periodic(n3p,m)
     else if (mu==4) then
-       call periodic(n4,k)
-       call periodic(n4p+1,l)
-       call periodic(n4p-1,m)
+       call periodic(n4+1,k)
+       call periodic(n4p-1,l)
+       call periodic(n4p,m)
     endif
-    d = (delta(k,l)-delta(k,m))*gamma(mu,alpha,beta)
+    d = (delta(k,m)-delta(l,m))*gamma(mu,alpha,beta)
   end function naive
   !-------------------------------------------------------------------
   !--- euclidian gamma matrix ----------------------------------------

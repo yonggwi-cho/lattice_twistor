@@ -38,27 +38,21 @@ program main
   write(10,*)"================================================================================================"
   call cpu_time(time1)
   write(*,*) "Start making a Dirac operator!"
-  do alpha = 1, Nspn
-     do beta = 1, Nspn
-        write(*,150) alpha,beta
-        do n1 = 1, Ns
-           do n1p = 1, Ns
-              do n2 = 1, Ns
-                 do n2p = 1, Ns
-                    do n3 = 1, Ns
-                       do n3p = 1, Ns
-                          do n4 = 1, Ns
-                             do n4p = 1, Ns
+  do n1 = 1, Ns
+     do n1p = 1, Ns
+        do n2 = 1, Ns
+           do n2p = 1, Ns
+              do n3 = 1, Ns
+                 do n3p = 1, Ns
+                    do n4 = 1, Ns
+                       do n4p = 1, Ns
+                          do alpha = 1, Nspn
+                             do beta = 1, Nspn
                                 do mu = 1, Ndir
                                    i =  alpha + Nspn*(n1-1) + Nspn*Ns*(n2-1) + Nspn*Ns**2*(n3-1) + Nspn*Ns**3*(n4-1)
                                    j =  beta  + Nspn*(n1p-1) + Nspn*Ns*(n2p-1) + Nspn*Ns**2*(n3p-1) + Nspn*Ns**3*(n4p-1)
                                    d = naive(n1,n1p,n2,n2p,n3,n3p,n4,n4p,alpha,beta,mu)
-                                   write(*,*) i,j,d
                                    Dirac(i,j) = Dirac(i,j) + d
-                                   if((abs(Dirac(i,j))*0.0d0)/=0.0d0) then
-                                      write(*,140)mu,alpha,n1,n2,n3,n4,Dirac(i,j)
-                                      stop 
-                                   endif
                                 enddo
                              enddo
                           enddo
@@ -71,6 +65,13 @@ program main
      enddo
   enddo
   write(*,*) "Finished making a Dirac operator!"
+  do j = 1, Nint
+     do i = 1, Nint
+        if (i==j) then
+           write(*,*) i,j,Dirac(i,j)
+        endif
+     enddo
+  enddo
   write(*,*) "Start solving a Dirac operator!"
   ! Compute the eigenvalues by using the lapack
   allocate(Eigen(Nint))
